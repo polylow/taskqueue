@@ -15,6 +15,26 @@ workers = []
 threads = []
 
 
+class Producer:
+
+    def __init__(id, ip, port):
+        self.r = redis.Redis(host=redis_ip, port=redis_port)
+        self.id = id
+        self.available = False
+
+    def set_available(self):
+        self.available = True
+
+    def set_not_available(self):
+        self.available = False
+
+    def enqueue(self, work):
+        source = marshal.dumps(work.__code__)
+        task = Task(source)
+        self.r.set(task.id, "pending")
+        send(task, master_ip, master_port)
+
+
 class Worker:
 
     def __init__(self, ip, port):
@@ -49,3 +69,17 @@ class Worker:
         except Exception:
             self.r.set(task.id, "failed")
         return result
+
+
+def add_producer(ip, port):
+    producer_id = md5(ip+port).hexdigest[:6]
+    producer = Producer(producer_id, redis_ip, redis_port)
+    producer.available = True
+    producers.push(producer)
+
+
+def add_worker(ip, port):
+    worker_id = md5(ip+port).hexdigest[:8]
+    worker = Worker(worker_id, ip, port)
+    worker.available = True
+    workers.push(worker)
