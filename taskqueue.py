@@ -83,3 +83,14 @@ def add_worker(ip, port):
     worker = Worker(worker_id, ip, port)
     worker.available = True
     workers.push(worker)
+
+
+def round_robin():
+    offset = 0
+    while True:
+        if workers[offset].is_available():
+            worker = workers[offset]
+            task = tq.get()
+            send(task, worker.ip, worker.port)
+        offset += 1
+        offset = offset % len(workers)
