@@ -1,7 +1,12 @@
 import redis
 import queue
-import thriftpy
+import threading
+import dill, types
+from hashlib import md5
 
+import thriftpy
+rpc_thrift = thriftpy.load("rpc.thrift", module_name="rpc_thrift")
+from thriftpy.rpc import make_server, make_client
 
 redis_ip = "127.0.0.1"
 redis_port = 6767
@@ -13,6 +18,12 @@ tq = queue.Queue()  # queue of task objs
 producers = []
 workers = []
 threads = []
+
+
+def send(task, ip, port=9090):
+    client = make_client(rpc_thrift.RPC, ip, port)
+    binary = marshal.dumps(task)
+    client.task_service(binary)
 
 
 class Producer:
@@ -94,3 +105,22 @@ def round_robin():
             send(task, worker.ip, worker.port)
         offset += 1
         offset = offset % len(workers)
+
+
+class QueueHandler:
+    def __init__(self):
+        pass
+
+    def task_service(self, task):
+        # task = marshal.loads(task)
+        tq.put(task)
+
+
+
+def listen():
+    server = make_server(rpc_thrift.RPC, QueueHandler(), master_ip, master_port)
+    server.serve()
+
+def main():
+    add_worker('172.16.0.170', 9091)
+    round_robin()
