@@ -124,3 +124,14 @@ def listen():
 def main():
     add_worker('172.16.0.170', 9091)
     round_robin()
+
+
+# Threading
+if __name__ == '__main__':
+    main_thread = threading.Thread(target=main)
+    threads.append(main_thread)
+    main_thread.start()
+
+    listener_thread = threading.Thread(target=listen)
+    threads.append(listener_thread)
+    listener_thread.start()
