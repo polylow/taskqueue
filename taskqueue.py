@@ -1,36 +1,40 @@
+import sys
+import uuid
 import redis
 import queue
+from hashlib import md5
 import threading
 import dill, types
+from task import Task
 from hashlib import md5
+import pudb as pdb
+import requests
 
 import thriftpy
-rpc_thrift = thriftpy.load("rpc.thrift", module_name="rpc_thrift")
+rpc_thrift = thriftpy.load('rpc.thrift', module_name='rpc_thrift')
 from thriftpy.rpc import make_server, make_client
 
-redis_ip = "127.0.0.1"
-redis_port = 6767
-master_ip = "172.16.1.146"
-master_port = 9090
+redis_ip = '127.0.0.1'
+redis_port = 6379
+master_ip = '172.16.1.137'
+master_port = 9091
 
 tq = queue.Queue()  # queue of task objs
-
-producers = []
+pending_queue = {}
 workers = []
 threads = []
 
 
-def send(task, ip, port=9090):
+def send(task, ip, port):
+    # pdb.set_trace()
     client = make_client(rpc_thrift.RPC, ip, port)
-    binary = marshal.dumps(task)
-    client.task_service(binary)
+    client.task_service(task)
 
 
 class Producer:
 
-    def __init__(id, ip, port):
+    def __init__(self, ip, port):
         self.r = redis.Redis(host=redis_ip, port=redis_port)
-        self.id = id
         self.available = False
 
     def set_available(self):
@@ -40,10 +44,11 @@ class Producer:
         self.available = False
 
     def enqueue(self, work):
-        source = marshal.dumps(work.__code__)
+        source = work.__code__
         task = Task(source)
-        self.r.set(task.id, "pending")
-        send(task, master_ip, master_port)
+        data = dill.dumps(task)
+        self.r.set(task.id, 'pending')
+        send(data, master_ip, master_port)
 
 
 class Worker:
@@ -67,8 +72,8 @@ class Worker:
             return True
 
     def task_service(self, task):
-        task = marshal.loads(task)
-        work(task)
+        task = dill.loads(task)
+        self.work(task)
 
     def work(self, task):
         self.r.set(task.id, "running")
