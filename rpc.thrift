@@ -1,3 +1,3 @@
 service RPC {
-  string task_service(1:string task)
+  void task_service(1:string task)
 }
