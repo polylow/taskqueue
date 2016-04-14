@@ -55,50 +55,46 @@ class Worker:
 
     def __init__(self, ip, port):
         self.r = redis.Redis(host=redis_ip, port=redis_port)
-        # self.id = None
+        self.id = md5((ip+str(port)).encode()).hexdigest()[:8]
         self.ip = ip
         self.port = port
+        self.set_available()
 
     def set_available(self):
-        self.r.set(self.id+".available", "1")
+        self.r.set(self.id+'.available', '1')
 
     def set_not_available(self):
-        self.r.set(self.id+".available", "0")
+        self.r.set(self.id+'.available', '0')
 
     def is_available(self):
-        if self.r.get(self.id+".available") == 0:
+        state = self.r.get(self.id+'.available').decode('utf-8')
+        if state == '0':
             return False
         else:
             return True
 
     def task_service(self, task):
+        self.set_not_available()
         task = dill.loads(task)
         self.work(task)
 
     def work(self, task):
-        self.r.set(task.id, "running")
-        result = None
+        self.r.set(task.id, 'running')
         try:
-            run = types.FunctionType(task.data, globals(), "run")
-            result = run()
-            self.r.set(task.id, "finished")
-        except Exception:
-            self.r.set(task.id, "failed")
-        return result
-
-
-def add_producer(ip, port):
-    producer_id = md5(ip+port).hexdigest[:6]
-    producer = Producer(producer_id, redis_ip, redis_port)
-    producer.available = True
-    producers.push(producer)
+            run = types.FunctionType(task.data, globals(), 'run')
+            task.result = run()
+            self.r.set(task.id, 'finished')
+        except Exception as error_msg:
+            print(error_msg, file=sys.stderr)
+            self.r.set(task.id, 'failed')
+        self.set_available()
+        return task.result
 
 
 def add_worker(ip, port):
-    worker_id = md5(ip+port).hexdigest[:8]
-    worker = Worker(worker_id, ip, port)
+    worker = Worker(ip, port)
     worker.available = True
-    workers.push(worker)
+    workers.append(worker)
 
 
 def round_robin():
@@ -113,13 +109,9 @@ def round_robin():
 
 
 class QueueHandler:
-    def __init__(self):
-        pass
 
     def task_service(self, task):
-        # task = marshal.loads(task)
         tq.put(task)
-
 
 
 def listen():
@@ -127,7 +119,7 @@ def listen():
     server.serve()
 
 def main():
-    add_worker('172.16.0.170', 9091)
+    add_worker('172.16.1.137', 9090)
     round_robin()
 
 
