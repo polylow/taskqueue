@@ -6,8 +6,7 @@ from hashlib import md5
 import threading
 import dill, types
 from task import Task
-from hashlib import md5
-import pudb as pdb
+from utils import rconn, getint, getstr
 import requests
 
 import thriftpy
@@ -26,7 +25,6 @@ threads = []
 
 
 def send(task, ip, port):
-    # pdb.set_trace()
     client = make_client(rpc_thrift.RPC, ip, port)
     client.task_service(task)
 
@@ -103,6 +101,7 @@ def round_robin():
         if workers[offset].is_available():
             worker = workers[offset]
             task = tq.get()
+            r.incr("output")
             send(task, worker.ip, worker.port)
         offset += 1
         offset = offset % len(workers)
@@ -111,6 +110,7 @@ def round_robin():
 class QueueHandler:
 
     def task_service(self, task):
+        r.incr("input")
         tq.put(task)
 
 
