@@ -29,6 +29,7 @@ def send(task, ip, port):
     client.task_service(task)
 
 
+
 class Producer:
 
     def __init__(self, ip, port):
@@ -61,8 +62,9 @@ class Worker:
     def set_available(self):
         self.r.set(self.id+'.available', '1')
 
-    def set_not_available(self):
+    def set_not_available(self, task_id):
         self.r.set(self.id+'.available', '0')
+        self.r.set(self.id+'.current', task_id)
 
     def is_available(self):
         state = self.r.get(self.id+'.available').decode('utf-8')
@@ -72,8 +74,8 @@ class Worker:
             return True
 
     def task_service(self, task):
-        self.set_not_available()
         task = dill.loads(task)
+        self.set_not_available(task.id)
         self.work(task)
 
     def work(self, task):
@@ -82,9 +84,11 @@ class Worker:
             run = types.FunctionType(task.data, globals(), 'run')
             task.result = run()
             self.r.set(task.id, 'finished')
+            self.r.incr(self.id+".count_success")
         except Exception as error_msg:
             print(error_msg, file=sys.stderr)
             self.r.set(task.id, 'failed')
+            self.r.incr(self.id+".count_failed")
         self.set_available()
         return task.result
 
