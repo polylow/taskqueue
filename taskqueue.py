@@ -5,23 +5,38 @@ import queue
 from hashlib import md5
 import threading
 import dill, types
-from task import Task
-from utils import rconn, getint, getstr
 import requests
 
 import thriftpy
 rpc_thrift = thriftpy.load('rpc.thrift', module_name='rpc_thrift')
 from thriftpy.rpc import make_server, make_client
 
-redis_ip = '127.0.0.1'
+redis_ip = '192.168.56.101'
 redis_port = 6379
 master_ip = '172.16.1.137'
 master_port = 9091
+
+from task import Task
+rconn = redis.Redis(redis_ip, redis_port)
+
 
 tq = queue.Queue()  # queue of task objs
 pending_queue = {}
 workers = []
 threads = []
+
+
+def getint(id):
+    try:
+        return int(rconn.get(id).decode('utf-8'))
+    except AttributeError:
+        return None
+
+def getstr(id):
+    try:
+        return rconn.get(id).decode('utf-8')
+    except AttributeError:
+        return None
 
 
 def send(task, ip, port):
@@ -33,7 +48,7 @@ def send(task, ip, port):
 class Producer:
 
     def __init__(self, ip, port):
-        self.r = redis.Redis(host=redis_ip, port=redis_port)
+        self.r = rconn
         self.available = False
 
     def set_available(self):
@@ -53,7 +68,7 @@ class Producer:
 class Worker:
 
     def __init__(self, ip, port):
-        self.r = redis.Redis(host=redis_ip, port=redis_port)
+        self.r = rconn
         self.id = md5((ip+str(port)).encode()).hexdigest()[:8]
         self.ip = ip
         self.port = port
@@ -105,7 +120,7 @@ def round_robin():
         if workers[offset].is_available():
             worker = workers[offset]
             task = tq.get()
-            r.incr("output")
+            rconn.incr("output")
             send(task, worker.ip, worker.port)
         offset += 1
         offset = offset % len(workers)
@@ -114,7 +129,7 @@ def round_robin():
 class QueueHandler:
 
     def task_service(self, task):
-        r.incr("input")
+        rconn.incr("input")
         tq.put(task)
 
 

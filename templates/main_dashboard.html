@@ -1,0 +1,193 @@
+<html>
+<head>
+<title>{{page_title}}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js" charset="utf-8"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+
+</head>
+<body>
+
+  <div id="containerin" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+  <script type="text/javascript">
+
+
+  $(function () {
+      $(document).ready(function () {
+          Highcharts.setOptions({ global: { useUTC: false } });
+
+          $('#containerin').highcharts({
+              chart: {
+                  type: 'line',
+                  animation: false,
+                  marginRight: 10,
+                  events: {
+                      load: function () {
+
+                          var series = this.series[0];
+                          var last = 0;
+
+                          setInterval(function () {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("GET", 'http://localhost:8000/io1.json', false);
+                            xhr.send(null);
+                            // console.log(xhr);
+                            // console.log(xhr.responseText);
+                            var sdd = JSON.parse(xhr.responseText).input;
+                            var ordinate = sdd - last;
+                              var x = (new Date()).getTime(), // current time
+                                  y = ordinate;
+                              series.addPoint([x, y], true, true);
+                              last = sdd;
+                          }, 1000);
+                      }
+                  }
+              },
+              title: {
+                  text: 'Input'
+              },
+              xAxis: {
+                  type: 'datetime',
+                  tickPixelInterval: 150
+              },
+              yAxis: {
+                  title: {
+                      text: 'Count'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  formatter: function () {
+                      return false;
+                      // return '<b>' + this.series.name + '</b><br/>' +
+                          // Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                          // Highcharts.numberFormat(this.y, 2);
+                  }
+              },
+              legend: {
+                  enabled: false
+              },
+              exporting: {
+                  enabled: false
+              },
+              series: [{
+                  name: 'Input',
+                  data: (function () {
+                      // generate an array of random data
+                      var data = [],
+                          time = (new Date()).getTime(),
+                          i;
+
+
+                      for (i = -19; i <= 0; i += 1) {
+
+                          data.push({
+                              x: time + i * 1000,
+                              y: 0
+                          });
+                      }
+                      return data;
+                  }())
+              }]
+          });
+      });
+  });
+
+</script>
+
+
+  <div id="containerout" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+  <script type="text/javascript">
+
+
+  $(function () {
+      $(document).ready(function () {
+          Highcharts.setOptions({ global: { useUTC: false } });
+
+          $('#containerout').highcharts({
+              chart: {
+                  type: 'line',
+                  animation: false,
+                  marginRight: 10,
+                  events: {
+                      load: function () {
+
+                          var series = this.series[0];
+                          var last = 0;
+
+                          setInterval(function () {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("GET", 'http://localhost:8000/io1.json', false);
+                            xhr.send(null);
+                            // console.log(xhr);
+                            // console.log(xhr.responseText);
+                            var sdd = JSON.parse(xhr.responseText).input;
+                            var ordinate = sdd - last;
+                              var x = (new Date()).getTime(), // current time
+                                  y = ordinate;
+                              series.addPoint([x, y], true, true);
+                              last = sdd;
+                          }, 1000);
+                      }
+                  }
+              },
+              title: {
+                  text: 'Output'
+              },
+              xAxis: {
+                  type: 'datetime',
+                  tickPixelInterval: 150
+              },
+              yAxis: {
+                  title: {
+                      text: 'Count'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  formatter: function () {
+                    return false;
+                      // return '<b>' + this.series.name + '</b><br/>' +
+                          // Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                          // Highcharts.numberFormat(this.y, 2);
+                  }
+              },
+              legend: {
+                  enabled: false
+              },
+              exporting: {
+                  enabled: false
+              },
+              series: [{
+                  name: 'Input',
+                  data: (function () {
+                      // generate an array of random data
+                      var data = [],
+                          time = (new Date()).getTime(),
+                          i;
+
+
+                      for (i = -19; i <= 0; i += 1) {
+
+                          data.push({
+                              x: time + i * 1000,
+                              y: 0
+                          });
+                      }
+                      return data;
+                  }())
+              }]
+          });
+      });
+  });
+
+</script>
+</body>
+</html>
