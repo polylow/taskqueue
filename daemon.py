@@ -1,12 +1,11 @@
 import os
 import sys
-import redis
 from django.conf import settings
 from django.conf.urls import url
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import RequestContext, loader
-from taskqueue import workers, redis_ip, redis_port, rconn, getint, getstr, fetch_task
+from taskqueue import rconn, getint, getstr, fetch_task
 from random import randrange
 
 
@@ -52,22 +51,22 @@ settings.configure(
 
 def fails(request):
     rindex = rconn.llen('fail')
-    if index > 10:
+    if rindex > 10:
         lindex = rindex - 10
     else:
         lindex = 0
     results = rconn.lrange('fail', lindex, rindex )
-    results = tuple(map(lambda x: x.decode('utf-8'), results))
+    results = (x.decode('utf-8') for x in results)
     return results
 
-def task(request, task_id):
+def task_data(request, task_id):
     task = fetch_task(task_id)
     data = {
-        available : getstr(task_id+'.status'),
-        creation_time : task.creation_time,
-        running_time : task.running_time,
-        result : task.result,
-        code : task.data,
+        'available' : getstr(task_id+'.status'),
+        'creation_time' : task.creation_time,
+        'running_time' : task.running_time,
+        'result' : task.result,
+        'code' : task.data,
     }
     return JsonResponse(data)
 
@@ -129,7 +128,7 @@ urlpatterns = (
     url(r'^worker/(?P<worker_id>[0-9a-z]{8})$', worker_dashboard),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8}).json$', worker),
     url(r'^task/(?P<task_id>[0-9a-z]{32})$', task_dashboard),
-    url(r'^task/(?P<task_id>[0-9a-z]{32}).json$', task),
+    url(r'^task/(?P<task_id>[0-9a-z]{32}).json$', task_data),
     url(r'^io.json', get_io),
     url(r'^io1.json',get_fake_io),
     url(r'^data.json', get_fake_json),

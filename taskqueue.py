@@ -1,21 +1,25 @@
 import sys
-import uuid
-import redis
 import queue
 from hashlib import md5
 import threading
 import dill, types
-import requests
 from time import time
+import redis
 
 import thriftpy
 dequeue_thrift = thriftpy.load('dequeue.thrift', module_name='dequeue_thrift')
 enqueue_thrift = thriftpy.load('enqueue.thrift', module_name='enqueue_thrift')
 from thriftpy.rpc import make_server, make_client
 
-redis_ip = '192.168.56.101'
+
+def get_ip(interface='eth0'):
+    from netifaces import AF_INET
+    import netifaces as ni
+    return ni.ifaddresses(interface)[AF_INET][0]['addr']
+
+redis_ip = get_ip('eth1')
 redis_port = 6379
-master_ip = '172.16.0.170'
+master_ip = get_ip()
 master_port = 9091
 
 from task import Task
@@ -48,7 +52,7 @@ def last_running():
         result.append(getstr('worker:'+worker.id+'.current'))
     none_count = result.count(None)
     for _ in none_count:
-        result.remove[None]
+        result.remove(None)
     return result
 
 
@@ -85,7 +89,7 @@ def fetch_task(task_id):
 
 class Producer:
 
-    def __init__(self, ip, port):
+    def __init__(self):
         self.r = rconn
         self.available = False
 
