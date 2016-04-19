@@ -4,14 +4,14 @@ from thriftpy.rpc import make_server
 from hashlib import md5
 
 
-rpc_thrift = thriftpy.load("rpc.thrift", module_name="rpc_thrift")
+dequeue_thrift = thriftpy.load("dequeue.thrift", module_name="dequeue_thrift")
 
 
-ip = "172.16.1.137"
+ip = "172.16.0.170"
 port = 9090
 
 def listen(port=9090):
-    server = make_server(rpc_thrift.RPC, Worker(ip , port), ip, port)
+    server = make_server(dequeue_thrift.RPC, Worker(ip , port), ip, port)
     server.serve()
 
 if __name__ == '__main__':
