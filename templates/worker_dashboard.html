@@ -1,10 +1,10 @@
 <html>
 <head>
 <title>Page Title</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js" charset="utf-8"></script>
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<link rel="stylesheet" href="https://bootswatch.com/darkly/bootstrap.css">
-<link rel="stylesheet" href="https://bootswatch.com/assets/css/custom.min.css" media="screen">
+<script src="/static/jquery.min.js" charset="utf-8"></script>
+<script src="/static/highcharts.js"></script>
+<link rel="stylesheet" href="/static/bootstrap.css">
+<link rel="stylesheet" href="/static/custom.min.css" media="screen">
 
 </head>
 <body>
@@ -24,9 +24,9 @@
 
   <div id="container" style="min-width: 310px; height: 400px; margin: 2% 2%"></div>
 
-  <script src="https://bootswatch.com/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/static/bootstrap.min.js"></script>
 <script type="text/javascript">
-var url = 'http://localhost:8000/data.json';
+var url = '/static/data.json';
 
 
 $(function () {
@@ -50,7 +50,7 @@ $('#container').highcharts({
         var series = this.series[0];
         setInterval(function () {
           var xhr = new XMLHttpRequest();
-          xhr.open("GET", 'http://localhost:8000/worker/a9022144.json', false);
+          xhr.open("GET", '/worker/{{worker_id}}.json', false);
           xhr.send(null);
           // console.log(xhr);
           // console.log(xhr.responseText);
