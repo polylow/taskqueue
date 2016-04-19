@@ -6,7 +6,7 @@ from django.conf.urls import url
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import RequestContext, loader
-from taskqueue import workers, redis_ip, redis_port, rconn, getint, getstr
+from taskqueue import workers, redis_ip, redis_port, rconn, getint, getstr, fetch_task
 from random import randrange
 
 
@@ -49,21 +49,40 @@ settings.configure(
 
 # views.py
 
+
+def fails(request):
+    rindex = rconn.llen('fail')
+    if index > 10:
+        lindex = rindex - 10
+    else:
+        lindex = 0
+    results = rconn.lrange('fail', lindex, rindex )
+    results = tuple(map(lambda x: x.decode('utf-8'), results))
+    return results
+
 def task(request, task_id):
-    pass
+    task = fetch_task(task_id)
+    data = {
+        available : getstr(task_id+'.status'),
+        creation_time : task.creation_time,
+        running_time : task.running_time,
+        result : task.result,
+        code : task.data,
+    }
+    return JsonResponse(data)
 
 def get_io(request):
-    return JsonResponse({'input': getint("input") or 0,
-                    'output': getint("output") or 0})
+    return JsonResponse({'input': getint('input') or 0,
+                    'output': getint('output') or 0})
 
 def worker(request, worker_id):
-    available = bool(getint(worker_id+".available"))
+    available = bool(getint('worker:'+worker_id+'.available'))
     if not available:
-        current = getstr(worker_id+".current")
+        current = getstr('worker:'+worker_id+'.current')
     else:
         current = None
-    count_success = getint(worker_id+".count_success") or 0
-    count_failed = getint(worker_id+".count_failed") or 0
+    count_success = getint('worker:'+worker_id+'.count_success') or 0
+    count_failed = getint('worker:'+worker_id+'.count_failed') or 0
     throughput = (count_failed or 0) + (count_success or 0) # total no of tasks finished
     data = {
         'available': available,
@@ -88,7 +107,7 @@ class ChartData:
 
 
 def home_dashboard(request):
-    context = {'page_title':"Task Queue Dashboard",
+    context = {'page_title':'Task Queue Dashboard',
                 'json_slug': [
                             ChartData('input', 'Input'),
                             ChartData('output', 'Output'),
@@ -97,10 +116,10 @@ def home_dashboard(request):
     return render(request, 'main_dashboard.html', context)
 
 def worker_dashboard(request, worker_id):
-    return render(request, 'worker_dashboard.html', {'page_title':"worker_dashboard", 'json_slug': ChartData('data', 'lolols')})
+    return render(request, 'worker_dashboard.html', {'page_title':'worker_dashboard', 'json_slug': ChartData('data', 'lolols')})
 
 def task_dashboard(request):
-    return render(request, 'main_dashboard.html', {'page_title':"lollypops"})
+    return render(request, 'main_dashboard.html', {'page_title':'lollypops'})
 
 
 # urls.py
@@ -118,7 +137,7 @@ urlpatterns = (
 
 # manage.py
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from django.core.management import execute_from_command_line
 
     execute_from_command_line(sys.argv)
