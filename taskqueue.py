@@ -5,6 +5,7 @@ import threading
 import dill, types
 from time import time
 import redis
+import requests
 
 import thriftpy
 dequeue_thrift = thriftpy.load('dequeue.thrift', module_name='dequeue_thrift')
@@ -84,6 +85,7 @@ def fetch_task(task_id):
         task = tasks[task_id]
         return task
     except KeyError:
+        print("task not found")
         return Task(None)
 
 
@@ -190,7 +192,7 @@ def listen():
     server.serve()
 
 def main():
-    add_worker('172.16.0.170', 9090)
+    add_worker('172.16.4.135', 9090)
     round_robin()
 
 

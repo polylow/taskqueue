@@ -59,17 +59,6 @@ def fails(request):
     results = (x.decode('utf-8') for x in results)
     return results
 
-def task_data(request, task_id):
-    task = fetch_task(task_id)
-    data = {
-        'available' : getstr(task_id+'.status'),
-        'creation_time' : task.creation_time,
-        'running_time' : task.running_time,
-        'result' : task.result,
-        'code' : task.data,
-    }
-    return JsonResponse(data)
-
 def get_io(request):
     return JsonResponse({'input': getint('input') or 0,
                     'output': getint('output') or 0})
@@ -99,26 +88,26 @@ def get_fake_io(request):
 def get_fake_json(request):
     return JsonResponse({'data': randrange(15,20)})
 
-class ChartData:
-    def __init__(self, slug, graph_title):
-        self.slug = slug
-        self.graph_title = graph_title
-
 
 def home_dashboard(request):
-    context = {'page_title':'Task Queue Dashboard',
-                'json_slug': [
-                            ChartData('input', 'Input'),
-                            ChartData('output', 'Output'),
-                ],
-    }
+    context = {'page_title':'Task Queue Dashboard'}
     return render(request, 'main_dashboard.html', context)
 
 def worker_dashboard(request, worker_id):
-    return render(request, 'worker_dashboard.html', {'page_title':'worker_dashboard', 'json_slug': ChartData('data', 'lolols')})
+    return render(request, 'worker_dashboard.html', {'page_title':'worker_dashboard', 'json_slug': worker_id})
 
-def task_dashboard(request):
-    return render(request, 'main_dashboard.html', {'page_title':'lollypops'})
+def task_dashboard(request, task_id):
+    task = fetch_task(task_id)
+    data = {
+        'id': task_id,
+        'status' : getstr(task_id+'.status'),
+        'creation_time' : task.creation_time,
+        'running_time' : task.running_time,
+        'result' : task.result,
+        'code' : task.data,
+        'page_title': 'Task Details',
+    }
+    return render(request, 'task.html', data)
 
 
 # urls.py
@@ -128,7 +117,6 @@ urlpatterns = (
     url(r'^worker/(?P<worker_id>[0-9a-z]{8})$', worker_dashboard),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8}).json$', worker),
     url(r'^task/(?P<task_id>[0-9a-z]{32})$', task_dashboard),
-    url(r'^task/(?P<task_id>[0-9a-z]{32}).json$', task_data),
     url(r'^io.json', get_io),
     url(r'^io1.json',get_fake_io),
     url(r'^data.json', get_fake_json),

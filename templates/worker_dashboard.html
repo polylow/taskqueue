@@ -50,7 +50,7 @@ $('#container').highcharts({
         var series = this.series[0];
         setInterval(function () {
           var xhr = new XMLHttpRequest();
-          xhr.open("GET", '/worker/{{worker_id}}.json', false);
+          xhr.open("GET", '/worker/{{json_slug}}.json', false);
           xhr.send(null);
           // console.log(xhr);
           // console.log(xhr.responseText);

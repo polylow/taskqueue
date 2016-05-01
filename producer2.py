@@ -4,7 +4,7 @@ import uuid
 from taskqueue import Producer
 
 
-producer = Producer("127.0.0.1", "6767")
+producer = Producer()
 
 
 def run():

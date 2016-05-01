@@ -23,56 +23,33 @@
   </div>
   <div>
     <table class="table table-striped table-hover" style="margin:2% 2%;">
-      <thead>
-        <tr>
-          <th>S.no</th>
-          <th>Task Id</th>
-          <th>Task Status</th>
-          <th>Task Creation Time</th>
-          <th>Task Running Time</th>
-        </tr>
-      </thead>
       <tbody>
         <tr>
-          <td>1</td>
-          <td>{{task.id}}</td>
-          <td>{{task.status}}</td>
-          <td>{{task.ct}}</td>
-          <td>{{task.rt}}</td>
+          <td>Task ID:</td>
+          <td>{{id}}</td>
+          <td>Status</td>
+          <td>{{status}}</td>
         </tr>
+
+
         <tr>
-          <td>2</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>4</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>Creation Time</td>
+          <td>{{creation_time}}</td>
+          <td>Running Time</td>
+          <td>{{running_time}}</td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="row" style="margin:2% 2%;">
 <div class="col-xs-5">
-{{task.result}}
+Result : {{result}}
 </div>
 <div class="col-xs-2">
 
 </div>
 <div class="col-xs-5">
-{{task.code}}
+Code: {{code}}
 </div>
   </div>
 

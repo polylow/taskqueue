@@ -2,6 +2,7 @@ import thriftpy
 from taskqueue import Worker
 from thriftpy.rpc import make_server
 from hashlib import md5
+import requests
 
 
 dequeue_thrift = thriftpy.load("dequeue.thrift", module_name="dequeue_thrift")
