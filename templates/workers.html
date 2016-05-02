@@ -113,18 +113,24 @@
                                       <th>Availability</th>
                                     	<th>Success Count</th>
                                     	<th>Fail Count</th>
-                                      <th></th>
+                                      <th>Current</th>
                                     </thead>
 
                                     <tbody>
                                         {% for i in workers.values() %}
                                         <tr>
                                         	<td><a href="/worker/{{i['id']}}">{{i['id']}}</a></td>
-                                        	<td>{{i['ip']}}</td>
+                                          <td>{{i['ip']}}</td>
                                         	<td>{{i['port']}}</td>
                                         	<td>{{i['available']}}</td>
                                         	<td>{{i['count_success']}}</td>
-                                            <td>{{ i['count_failed'] }}</td>
+                                          <td>{{ i['count_failed'] }}</td>
+                                          {% if i['current'] %}
+                                          <td><a href="/task/{{i['current']}}">{{i['current']}}</a></td>
+                                          {% else %}
+                                          <td>{{i['current']}}</td>
+                                          {% endif %}
+
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -132,7 +138,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

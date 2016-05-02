@@ -85,7 +85,7 @@ def worker(request, worker_id):
 def workers(request):
     results = rconn.lrange("workers", 0, -1)
     workers_list = [x.decode('utf-8') for x in results]
-    results = []
+    results = {}
 
     for worker in workers_list:
         worker_id = worker.split()[0]
@@ -107,7 +107,7 @@ def workers(request):
         }
         results[worker_id] = data
 
-    return render(request, 'workers.html', {'workers': data})
+    return render(request, 'workers.html', {'workers': results})
 
 
 def home_dashboard(request):
@@ -134,7 +134,7 @@ def task_dashboard(request, task_id):
 
 urlpatterns = (
     url(r'^$', home_dashboard),
-    url(r'^worker/$', workers),
+    url(r'^workers/$', workers),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8})$', worker_dashboard),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8}).json$', worker),
     url(r'^task/(?P<task_id>[0-9a-z]{32})$', task_dashboard),
