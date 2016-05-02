@@ -18,9 +18,9 @@ def get_ip(interface='eth0'):
     import netifaces as ni
     return ni.ifaddresses(interface)[AF_INET][0]['addr']
 
-redis_ip = "10.42.0.1"
+redis_ip = "127.0.0.1"
 redis_port = 6379
-master_ip = "10.42.0.1"
+master_ip = "127.0.0.1"
 master_port = 9091
 
 from task import Task
@@ -193,6 +193,7 @@ def listen():
 
 def main():
     add_worker('172.16.4.135', 9090)
+    add_worker('127.0.0.1', 9090)
     round_robin()
 
 

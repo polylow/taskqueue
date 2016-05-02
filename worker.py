@@ -8,7 +8,7 @@ import requests
 dequeue_thrift = thriftpy.load("dequeue.thrift", module_name="dequeue_thrift")
 
 
-ip = get_ip("wlo1")
+ip = "127.0.0.1"
 port = 9090
 
 def listen(port=9090):
