@@ -8,8 +8,7 @@ producer = Producer()
 
 
 def run():
-    result = requests.get("http://ayushshanker.me")
-    print(result.status_code)
+    raise Exception
 
 
 for i in range(188):
