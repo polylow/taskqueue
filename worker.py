@@ -1,5 +1,5 @@
 import thriftpy
-from taskqueue import Worker
+from taskqueue import Worker, get_ip
 from thriftpy.rpc import make_server
 from hashlib import md5
 import requests
@@ -8,7 +8,7 @@ import requests
 dequeue_thrift = thriftpy.load("dequeue.thrift", module_name="dequeue_thrift")
 
 
-ip = "172.16.0.170"
+ip = get_ip("wlo1")
 port = 9090
 
 def listen(port=9090):

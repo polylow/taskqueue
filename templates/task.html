@@ -1,58 +1,211 @@
-<html>
-
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Page Title</title>
-  <script src="/static/jquery.min.js" charset="utf-8"></script>
-  <script src="/static/highcharts.js"></script>
-  <link rel="stylesheet" href="/static/bootstrap.css">
-  <link rel="stylesheet" href="/static/custom.min.css" media="screen">
+	<meta charset="utf-8" />
+	<!-- <link rel="icon" type="image/png" href="/static/img/favicon.ico"> -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+	<title>Task: {{id}}</title>
+
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
+    <link href="/static/css/demo.css" rel="stylesheet" />
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="/static/css/pe-icon-7-stroke.css" rel="stylesheet" />
 </head>
-
 <body>
-  <div class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <a href="../" class="navbar-brand">Task Dashboard</a>
-        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-      </div>
+
+<div class="wrapper">
+    <div class="sidebar" data-color="orange" data-image="/static/img/sidebar-5.jpg">
+
+    	<div class="sidebar-wrapper">
+            <div class="logo">
+                <a href="//" class="simple-text">
+                    TaskQ
+                </a>
+            </div>
+
+            <ul class="nav">
+                <li>
+                    <a href="/">
+                        <i class="pe-7s-graph"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="/workers">
+                        <i class="pe-7s-user"></i>
+                        <p>Workers</p>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="#">
+                        <i class="pe-7s-note2"></i>
+                        <p>Tasks</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="/config">
+                        <i class="pe-7s-news-paper"></i>
+                        <p>Configuration</p>
+                    </a>
+                </li>
+            </ul>
+    	</div>
     </div>
-  </div>
-  <div>
-    <table class="table table-striped table-hover" style="margin:2% 2%;">
-      <tbody>
-        <tr>
-          <td>Task ID:</td>
-          <td>{{id}}</td>
-          <td>Status</td>
-          <td>{{status}}</td>
-        </tr>
+
+    <div class="main-panel">
+        <nav class="navbar navbar-default navbar-fixed">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Worker List</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-dashboard"></i>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+
+                        <li>
+                            <a href="#">
+                                Log out
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
 
-        <tr>
-          <td>Creation Time</td>
-          <td>{{creation_time}}</td>
-          <td>Running Time</td>
-          <td>{{running_time}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="row" style="margin:2% 2%;">
-<div class="col-xs-5">
-Result : {{result}}
-</div>
-<div class="col-xs-2">
+        <div class="content">
+            <div class="container-fluid">
+							<div class="row">
 
+									<div class="col-md-4">
+											<div class="card card-user">
+													<div class="card-content">
+															<div class="author">
+																		<h4 class="title"><strong>Task ID</strong>	</h4>
+																		<p class="card-value">{{id}}</p>
+															</div>
+															<!-- <p class="description text-center"> Lamborghini Mercy <br> -->
+															<!-- </p> -->
+													</div>
+													<hr>
+
+											</div>
+									</div>
+
+									<div class="col-md-4">
+												<div class="card card-user">
+														<div class="card-content">
+																<div class="author">
+
+																			<h4 class="title"><strong>Status</strong><br />
+																			</h4>
+                                      {% if status == "finished" %}
+  																		<p class="card-value text-success">{{status}}</p>
+  																		{% elif  status == "failed" %}
+  																		<p class="card-value text-danger">{{status}}</p>
+  																		{% else %}
+  																		<p class="card-value text-info">{{status}}</p>
+  																		{% endif %}
+																</div>
+														</div>
+														<hr>
+
+												</div>
+										</div>
+
+									<div class="col-md-4">
+											<div class="card card-user">
+													<div class="card-content">
+															<div class="author">
+
+																		 <h4 class="title"><strong>Creation Time</strong><br />
+ 																		</h4>
+																		<p class="card-value">{{creation_time}}</p>
+
+																		<h4 class="title"><strong>Running Time</strong><br />
+																		</h4>
+																		<p class="card-value">{{running_time}}</p>
+
+															</div>
+
+													</div>
+													<hr>
+
+											</div>
+									</div>
+							</div>
+
+
+
+							<div class="row">
+									<div class="col-md-6">
+											<div class="card card-user">
+													<div class="card-content">
+															<div class="author">
+																		<h4 class="title"><strong>RESULT</strong><br />
+																		</h4>
+                                    <p class="card-value">{{result}}</p>
+															</div>
+															<!-- <p class="description text-center"> Lamborghini Mercy <br> -->
+															<!-- </p> -->
+													</div>
+													<hr>
+
+											</div>
+									</div>
+
+									<div class="col-md-6">
+												<div class="card card-user">
+														<div class="card-content">
+																<div class="author">
+
+																			<h4 class="title"><strong>Code</strong><br />
+																			</h4>
+																			<p class="card-value code">{{code}}</p>
+																</div>
+														</div>
+														<hr>
+
+												</div>
+										</div>
+
+							</div>
+				  </div>
+        </div>
+
+
+    </div>
 </div>
-<div class="col-xs-5">
-Code: {{code}}
-</div>
-  </div>
+
 
 </body>
+
+    <!--   Core JS Files   -->
+    <script src="/static/js/jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+
+    <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
+	<!-- <script src="/static/js/light-bootstrap-dashboard.js"></script> -->
+
+
 
 </html>

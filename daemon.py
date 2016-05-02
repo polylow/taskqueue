@@ -105,7 +105,6 @@ def task_dashboard(request, task_id):
         'running_time' : task.running_time,
         'result' : task.result,
         'code' : task.data,
-        'page_title': 'Task Details',
     }
     return render(request, 'task.html', data)
 

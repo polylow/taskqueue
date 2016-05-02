@@ -18,9 +18,9 @@ def get_ip(interface='eth0'):
     import netifaces as ni
     return ni.ifaddresses(interface)[AF_INET][0]['addr']
 
-redis_ip = get_ip('eth1')
+redis_ip = "10.42.0.1"
 redis_port = 6379
-master_ip = get_ip()
+master_ip = "10.42.0.1"
 master_port = 9091
 
 from task import Task

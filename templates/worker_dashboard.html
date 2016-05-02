@@ -1,324 +1,475 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>Page Title</title>
-<script src="/static/jquery.min.js" charset="utf-8"></script>
-<script src="/static/highcharts.js"></script>
-<link rel="stylesheet" href="/static/bootstrap.css">
-<link rel="stylesheet" href="/static/custom.min.css" media="screen">
+	<meta charset="utf-8" />
+	<link rel="icon" type="image/png" href="/static/img/favicon.ico">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+	<title>TaskQ</title>
+
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
+    <link href="/static/css/demo.css" rel="stylesheet" />
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="/static/css/pe-icon-7-stroke.css" rel="stylesheet" />
+
+    <style media="screen">
+      #chartcard {
+        background-color: #2a2a2b;
+      }
+
+      #charttitle {
+        color: white;
+      }
+      .big {
+        font-size: xx-large;
+      }
+      .white{
+        color: white;
+      }
+      .white:hover{
+        color: orchid;
+      }
+    </style>
 
 </head>
 <body>
-  <div class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <a href="../" class="navbar-brand">Worker Dashboard</a>
-        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-      </div>
+
+<div class="wrapper">
+    <div class="sidebar" data-color="azure" data-image="/static/img/sidebar-5.jpg">
+    	<div class="sidebar-wrapper">
+            <div class="logo">
+                <a href="/" class="simple-text">
+                    TASKQ
+                </a>
+            </div>
+
+            <ul class="nav">
+								<li>
+                    <a href="/">
+                        <i class="pe-7s-graph"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+								<li class="active">
+                    <a href="/workers">
+                        <i class="pe-7s-user"></i>
+                        <p>Workers</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="table.html">
+                        <i class="pe-7s-note2"></i>
+                        <p>Table List</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="/config">
+                        <i class="pe-7s-news-paper"></i>
+                        <p>Configuration</p>
+                    </a>
+                </li>
+            </ul>
+    	</div>
     </div>
 
-  </div>
-
-  <div id="container" style="min-width: 310px; height: 400px; margin: 2% 2%"></div>
-
-  <script src="/static/bootstrap.min.js"></script>
-<script type="text/javascript">
-var url = '/static/data.json';
-
-
-$(function () {
-    $(document).ready(function () {
-        Highcharts.setOptions({
-            global: {
-                useUTC: false
-            }
-        });
-
-$('#container').highcharts({
-    chart: {
-        type: 'line',
-        animation: Highcharts.svg, // don't animate in old IE
-        marginRight: 10,
-        events: {
-    load: function () {
-
-        // set up the updating of the chart each second
-        var temp=0;
-        var series = this.series[0];
-        setInterval(function () {
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", '/worker/{{json_slug}}.json', false);
-          xhr.send(null);
-          // console.log(xhr);
-          // console.log(xhr.responseText);
-          var sdd=JSON.parse(xhr.responseText).count_success;
-          var tt=sdd-temp;
-            var x = (new Date()).getTime(), // current time
-                y = tt;
-            series.addPoint([x, y], true, true);
-            temp=sdd;
-        }, 1000);
-    }
-        }
-    },
-  title: {
-      text: 'Live random data'
-  },
-  xAxis: {
-      type: 'datetime',
-      tickPixelInterval: 150
-  },
-  yAxis: {
-      title: {
-          text: 'Value'
-      },
-      plotLines: [{
-          value: 0,
-          width: 1,
-          color: '#808080'
-      }]
-  },
-  tooltip: {
-      formatter: function () {
-          return '<b>' + this.series.name + '</b><br/>' +
-              Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-              Highcharts.numberFormat(this.y, 2);
-      }
-  },
-  legend: {
-      enabled: false
-  },
-  exporting: {
-      enabled: false
-  },
-  series: [{
-      name: 'Random data',
-      data: (function () {
-          // generate an array of random data
-          var data = [],
-              time = (new Date()).getTime(),
-              i;
+    <div class="main-panel">
+        <nav class="navbar navbar-default navbar-fixed">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Dashboard</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#">
+                                Log out
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
 
-          for (i = -19; i <= 0; i += 1) {
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">Worker: {{json_slug}}</h4>
+                                <p class="category">Worker Metrics</p>
+                            </div>
+                            <div class="content">
 
-              data.push({
-                  x: time + i * 1000,
-                  y: 0
-              });
-          }
-          return data;
-      }())
-  }]
-});
-    });
-});
+                              <div class="alert alert-warning">
+                                <strong>Status :</strong> <br> <p class="big" id="val-status"> Available</p>
+                              </div>
+                              <div class="alert alert-success">
+                                <strong> Successfully finished :</strong><br> <p class="big" id="val-success">0</p>
+                              </div>
+                              <div class="alert alert-danger">
+                                <strong>Execution Failed :</strong> <br> <p class="big" id="val-failed">0</p>
+                              </div>
+                              <div class="alert alert-info">
+                                <strong>Currently Executing :</strong> <br> <a href="/" class="white" id="val-current"> None </a>
+                              </div>
 
 
-Highcharts.theme = {
-   colors: ["#2b908f", "#90ee7e", "#f45b5b", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
-      "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
-   chart: {
-      backgroundColor: {
-         linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
-         stops: [
-            [0, '#2a2a2b'],
-            [1, '#3e3e40']
-         ]
-      },
-      style: {
-         fontFamily: "'Unica One', sans-serif"
-      },
-      plotBorderColor: '#606063'
-   },
-   title: {
-      style: {
-         color: '#E0E0E3',
-         textTransform: 'uppercase',
-         fontSize: '20px'
-      }
-   },
-   subtitle: {
-      style: {
-         color: '#E0E0E3',
-         textTransform: 'uppercase'
-      }
-   },
-   xAxis: {
-      gridLineColor: '#707073',
-      labels: {
-         style: {
-            color: '#E0E0E3'
-         }
-      },
-      lineColor: '#707073',
-      minorGridLineColor: '#505053',
-      tickColor: '#707073',
-      title: {
-         style: {
-            color: '#A0A0A3'
+                            </div>
+                        </div>
+                    </div>
 
-         }
-      }
-   },
-   yAxis: {
-      gridLineColor: '#707073',
-      labels: {
-         style: {
-            color: '#E0E0E3'
-         }
-      },
-      lineColor: '#707073',
-      minorGridLineColor: '#505053',
-      tickColor: '#707073',
-      tickWidth: 1,
-      title: {
-         style: {
-            color: '#A0A0A3'
-         }
-      }
-   },
-   tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      style: {
-         color: '#F0F0F0'
-      }
-   },
-   plotOptions: {
-      series: {
-         dataLabels: {
-            color: '#B0B0B3'
-         },
-         marker: {
-            lineColor: '#333'
-         }
-      },
-      boxplot: {
-         fillColor: '#505053'
-      },
-      candlestick: {
-         lineColor: 'white'
-      },
-      errorbar: {
-         color: 'white'
-      }
-   },
-   legend: {
-      itemStyle: {
-         color: '#E0E0E3'
-      },
-      itemHoverStyle: {
-         color: '#FFF'
-      },
-      itemHiddenStyle: {
-         color: '#606063'
-      }
-   },
-   credits: {
-      style: {
-         color: '#666'
-      }
-   },
-   labels: {
-      style: {
-         color: '#707073'
-      }
-   },
+                    <div class="col-md-8">
+                        <div class="card" id="chartcard">
+                            <div class="header">
+                                <h4 class="title" id="charttitle">Worker I/O</h4>
+                                <p class="category">tasks finished per time interval</p>
+                            </div>
+                            <div class="content">
+															<div id="container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-   drilldown: {
-      activeAxisLabelStyle: {
-         color: '#F0F0F3'
-      },
-      activeDataLabelStyle: {
-         color: '#F0F0F3'
-      }
-   },
+                </div>
+            </div>
+        </div>
 
-   navigation: {
-      buttonOptions: {
-         symbolStroke: '#DDDDDD',
-         theme: {
-            fill: '#505053'
-         }
-      }
-   },
+    </div>
+</div>
 
-   // scroll charts
-   rangeSelector: {
-      buttonTheme: {
-         fill: '#505053',
-         stroke: '#000000',
-         style: {
-            color: '#CCC'
-         },
-         states: {
-            hover: {
-               fill: '#707073',
-               stroke: '#000000',
-               style: {
-                  color: 'white'
-               }
-            },
-            select: {
-               fill: '#000003',
-               stroke: '#000000',
-               style: {
-                  color: 'white'
-               }
-            }
-         }
-      },
-      inputBoxBorderColor: '#505053',
-      inputStyle: {
-         backgroundColor: '#333',
-         color: 'silver'
-      },
-      labelStyle: {
-         color: 'silver'
-      }
-   },
 
-   navigator: {
-      handles: {
-         backgroundColor: '#666',
-         borderColor: '#AAA'
-      },
-      outlineColor: '#CCC',
-      maskFill: 'rgba(255,255,255,0.1)',
-      series: {
-         color: '#7798BF',
-         lineColor: '#A6C7ED'
-      },
-      xAxis: {
-         gridLineColor: '#505053'
-      }
-   },
-
-   scrollbar: {
-      barBackgroundColor: '#808083',
-      barBorderColor: '#808083',
-      buttonArrowColor: '#CCC',
-      buttonBackgroundColor: '#606063',
-      buttonBorderColor: '#606063',
-      rifleColor: '#FFF',
-      trackBackgroundColor: '#404043',
-      trackBorderColor: '#404043'
-   },
-
-   // special colors for some of the
-   legendBackgroundColor: 'rgba(0, 0, 0, 0.5)',
-   background2: '#505053',
-   dataLabelsColor: '#B0B0B3',
-   textColor: '#C0C0C0',
-   contrastTextColor: '#F0F0F3',
-   maskColor: 'rgba(255,255,255,0.3)'
-};
-
-// Apply the theme
-Highcharts.setOptions(Highcharts.theme);
-</script>
 </body>
+
+    <!--   Core JS Files   -->
+    <script src="/static/js/jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/static/highcharts.js"></script>
+	<!--  Checkbox, Radio & Switch Plugins -->
+	<script src="/static/js/bootstrap-checkbox-radio-switch.js"></script>
+
+	<script src="/static/js/light-bootstrap-dashboard.js"></script>
+
+	<!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
+	<!-- <script src="/static/js/demo.js"></script> -->
+
+	<script type="text/javascript">
+	var url = '/static/data.json';
+
+
+	$(function () {
+	    $(document).ready(function () {
+	        Highcharts.setOptions({
+	            global: {
+	                useUTC: false
+	            }
+	        });
+
+	$('#container').highcharts({
+	    chart: {
+	        type: 'line',
+	        animation: Highcharts.svg, // don't animate in old IE
+	        marginRight: 10,
+	        events: {
+	    load: function () {
+
+	        // set up the updating of the chart each second
+	        var temp=0;
+	        var series = this.series[0];
+	        setInterval(function () {
+	          var xhr = new XMLHttpRequest();
+	          xhr.open("GET", '/worker/{{json_slug}}.json', false);
+	          xhr.send(null);
+	          // console.log(xhr);
+	          // console.log(xhr.responseText);
+            var jsn = JSON.parse(xhr.responseText);
+            document.getElementById("val-success").innerHTML = jsn.count_success;
+            document.getElementById("val-failed").innerHTML = jsn.count_failed;
+            document.getElementById("val-current").innerHTML = jsn.current || "None";
+            if (jsn.available){
+              document.getElementById("val-status").innerHTML = "Available";
+            }else{
+              document.getElementById("val-status").innerHTML = "Busy";
+            }
+
+	          var sdd=jsn.count_success;
+	          var tt=sdd-temp;
+	            var x = (new Date()).getTime(), // current time
+	                y = tt;
+	            series.addPoint([x, y], true, true);
+	            temp=sdd;
+	        }, 1000);
+	    }
+	        }
+	    },
+	  title: {
+	      text: 'Throughput'
+	  },
+	  xAxis: {
+	      type: 'datetime',
+	      tickPixelInterval: 150
+	  },
+	  yAxis: {
+	      title: {
+	          text: 'Tasks'
+	      },
+	      plotLines: [{
+	          value: 0,
+	          width: 1,
+	          color: '#808080'
+	      }]
+	  },
+	  tooltip: {
+	      formatter: function () {
+	          return '<b>' + this.series.name + '</b><br/>' +
+	              Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+	              Highcharts.numberFormat(this.y, 2);
+	      }
+	  },
+	  legend: {
+	      enabled: false
+	  },
+	  exporting: {
+	      enabled: false
+	  },
+	  series: [{
+	      name: 'No. of Tasks',
+	      data: (function () {
+	          // generate an array of random data
+	          var data = [],
+	              time = (new Date()).getTime(),
+	              i;
+
+
+	          for (i = -19; i <= 0; i += 1) {
+
+	              data.push({
+	                  x: time + i * 1000,
+	                  y: 0
+	              });
+	          }
+	          return data;
+	      }())
+	  }]
+	});
+	    });
+	});
+
+
+	Highcharts.theme = {
+	   colors: ["#2b908f", "#90ee7e", "#f45b5b", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+	      "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+	   chart: {
+	      backgroundColor: {
+	         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 0 },
+	         stops: [
+	            [0, '#2a2a2b'],
+	            [1, '#2a2a2b']
+	         ]
+	      },
+	      style: {
+	         fontFamily: "'Roboto', sans-serif"
+	      },
+	      plotBorderColor: '#606063'
+	   },
+	   title: {
+	      style: {
+	         color: '#E0E0E3',
+	         textTransform: 'uppercase',
+	         fontSize: '20px'
+	      }
+	   },
+	   subtitle: {
+	      style: {
+	         color: '#E0E0E3',
+	         textTransform: 'uppercase'
+	      }
+	   },
+	   xAxis: {
+	      gridLineColor: '#707073',
+	      labels: {
+	         style: {
+	            color: '#E0E0E3'
+	         }
+	      },
+	      lineColor: '#707073',
+	      minorGridLineColor: '#505053',
+	      tickColor: '#707073',
+	      title: {
+	         style: {
+	            color: '#A0A0A3'
+
+	         }
+	      }
+	   },
+	   yAxis: {
+	      gridLineColor: '#707073',
+	      labels: {
+	         style: {
+	            color: '#E0E0E3'
+	         }
+	      },
+	      lineColor: '#707073',
+	      minorGridLineColor: '#505053',
+	      tickColor: '#707073',
+	      tickWidth: 1,
+	      title: {
+	         style: {
+	            color: '#A0A0A3'
+	         }
+	      }
+	   },
+	   tooltip: {
+	      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+	      style: {
+	         color: '#F0F0F0'
+	      }
+	   },
+	   plotOptions: {
+	      series: {
+	         dataLabels: {
+	            color: '#B0B0B3'
+	         },
+	         marker: {
+	            lineColor: '#333'
+	         }
+	      },
+	      boxplot: {
+	         fillColor: '#505053'
+	      },
+	      candlestick: {
+	         lineColor: 'white'
+	      },
+	      errorbar: {
+	         color: 'white'
+	      }
+	   },
+	   legend: {
+	      itemStyle: {
+	         color: '#E0E0E3'
+	      },
+	      itemHoverStyle: {
+	         color: '#FFF'
+	      },
+	      itemHiddenStyle: {
+	         color: '#606063'
+	      }
+	   },
+	   credits: {
+	      style: {
+	         color: '#666'
+	      }
+	   },
+	   labels: {
+	      style: {
+	         color: '#707073'
+	      }
+	   },
+
+	   drilldown: {
+	      activeAxisLabelStyle: {
+	         color: '#F0F0F3'
+	      },
+	      activeDataLabelStyle: {
+	         color: '#F0F0F3'
+	      }
+	   },
+
+	   navigation: {
+	      buttonOptions: {
+	         symbolStroke: '#DDDDDD',
+	         theme: {
+	            fill: '#505053'
+	         }
+	      }
+	   },
+
+	   // scroll charts
+	   rangeSelector: {
+	      buttonTheme: {
+	         fill: '#505053',
+	         stroke: '#000000',
+	         style: {
+	            color: '#CCC'
+	         },
+	         states: {
+	            hover: {
+	               fill: '#707073',
+	               stroke: '#000000',
+	               style: {
+	                  color: 'white'
+	               }
+	            },
+	            select: {
+	               fill: '#000003',
+	               stroke: '#000000',
+	               style: {
+	                  color: 'white'
+	               }
+	            }
+	         }
+	      },
+	      inputBoxBorderColor: '#505053',
+	      inputStyle: {
+	         backgroundColor: '#333',
+	         color: 'silver'
+	      },
+	      labelStyle: {
+	         color: 'silver'
+	      }
+	   },
+
+	   navigator: {
+	      handles: {
+	         backgroundColor: '#666',
+	         borderColor: '#AAA'
+	      },
+	      outlineColor: '#CCC',
+	      maskFill: 'rgba(255,255,255,0.1)',
+	      series: {
+	         color: '#7798BF',
+	         lineColor: '#A6C7ED'
+	      },
+	      xAxis: {
+	         gridLineColor: '#505053'
+	      }
+	   },
+
+	   scrollbar: {
+	      barBackgroundColor: '#808083',
+	      barBorderColor: '#808083',
+	      buttonArrowColor: '#CCC',
+	      buttonBackgroundColor: '#606063',
+	      buttonBorderColor: '#606063',
+	      rifleColor: '#FFF',
+	      trackBackgroundColor: '#404043',
+	      trackBorderColor: '#404043'
+	   },
+
+	   // special colors for some of the
+	   legendBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+	   background2: '#505053',
+	   dataLabelsColor: '#B0B0B3',
+	   textColor: '#C0C0C0',
+	   contrastTextColor: '#F0F0F3',
+	   maskColor: 'rgba(255,255,255,0.3)'
+	};
+
+	// Apply the theme
+	Highcharts.setOptions(Highcharts.theme);
+	</script>
+
 </html>
