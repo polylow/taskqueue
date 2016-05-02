@@ -16,5 +16,5 @@ def listen(port=9090):
     server.serve()
 
 if __name__ == '__main__':
-    print(md5((ip+str(port)).encode()).hexdigest()[:8])
+    print("ID:", md5((ip+str(port)).encode()).hexdigest()[:8])
     listen(port)

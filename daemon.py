@@ -81,12 +81,33 @@ def worker(request, worker_id):
     }
     return JsonResponse(data)
 
-def get_fake_io(request):
-    return JsonResponse({'input': randrange(15,20), 'output': randrange(15,20)})
 
+def workers(request):
+    results = rconn.lrange("workers", 0, -1)
+    workers_list = [x.decode('utf-8') for x in results]
+    results = []
 
-def get_fake_json(request):
-    return JsonResponse({'data': randrange(15,20)})
+    for worker in workers_list:
+        worker_id = worker.split()[0]
+        available = bool(getint('worker:'+worker_id+'.available'))
+        if not available:
+            current = getstr('worker:'+worker_id+'.current')
+        else:
+            current = None
+        count_success = getint('worker:'+worker_id+'.count_success') or 0
+        count_failed = getint('worker:'+worker_id+'.count_failed') or 0
+        data = {
+            'id': worker_id,
+            'ip': worker.split()[1],
+            'port': worker.split()[2],
+            'available': available,
+            'current': current,
+            'count_success': count_success,
+            'count_failed': count_failed,
+        }
+        results[worker_id] = data
+
+    return render(request, 'workers.html', {'workers': data})
 
 
 def home_dashboard(request):
@@ -113,12 +134,11 @@ def task_dashboard(request, task_id):
 
 urlpatterns = (
     url(r'^$', home_dashboard),
+    url(r'^worker/$', workers),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8})$', worker_dashboard),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8}).json$', worker),
     url(r'^task/(?P<task_id>[0-9a-z]{32})$', task_dashboard),
     url(r'^io.json', get_io),
-    url(r'^io1.json',get_fake_io),
-    url(r'^data.json', get_fake_json),
 )
 
 # manage.py

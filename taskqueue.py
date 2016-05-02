@@ -160,6 +160,7 @@ class Worker:
 def add_worker(ip, port):
     worker = Worker(ip, port)
     workers.append(worker)
+    rconn.lpush("workers", "{} {} {}".format(worker.id, ip, port))
 
 
 def add_task(task, task_id):
@@ -192,7 +193,7 @@ def listen():
     server.serve()
 
 def main():
-    add_worker('172.16.4.135', 9090)
+    add_worker('127.0.0.1', 9089)
     add_worker('127.0.0.1', 9090)
     round_robin()
 
