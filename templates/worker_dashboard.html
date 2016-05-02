@@ -154,21 +154,18 @@
 
 </body>
 
-    <!--   Core JS Files   -->
-    <script src="/static/js/jquery-1.10.2.js" type="text/javascript"></script>
-	<script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/static/js/jquery-1.10.2.js" type="text/javascript"></script>
+<script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="/static/highcharts.js"></script>
-	<!--  Checkbox, Radio & Switch Plugins -->
-	<script src="/static/js/bootstrap-checkbox-radio-switch.js"></script>
+<script src="/static/js/bootstrap-checkbox-radio-switch.js"></script>
 
-	<script src="/static/js/light-bootstrap-dashboard.js"></script>
+<script src="/static/js/light-bootstrap-dashboard.js"></script>
 
-	<!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
-	<!-- <script src="/static/js/demo.js"></script> -->
+<!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
+<!-- <script src="/static/js/demo.js"></script> -->
 
-	<script type="text/javascript">
+<script type="text/javascript">
 	var url = '/static/data.json';
-
 
 	$(function () {
 	    $(document).ready(function () {
@@ -181,14 +178,17 @@
 	$('#container').highcharts({
 	    chart: {
 	        type: 'line',
-	        animation: Highcharts.svg, // don't animate in old IE
+	        animation: Highcharts.svg,
 	        marginRight: 10,
 	        events: {
 	    load: function () {
 
-	        // set up the updating of the chart each second
-	        var temp=0;
 	        var series = this.series[0];
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", '/worker/{{json_slug}}.json', false);
+          xhr.send(null);
+          var temp = JSON.parse(xhr.responseText);
+
 	        setInterval(function () {
 	          var xhr = new XMLHttpRequest();
 	          xhr.open("GET", '/worker/{{json_slug}}.json', false);

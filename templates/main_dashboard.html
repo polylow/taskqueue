@@ -284,7 +284,10 @@
                       load: function () {
 
                           var series = this.series[0];
-                          var last = 0;
+                          var xhr = new XMLHttpRequest();
+                          xhr.open("GET", '/io.json', false);
+                          xhr.send(null);
+                          var last = JSON.parse(xhr.responseText).input;
 
                           setInterval(function () {
                             var xhr = new XMLHttpRequest();
@@ -362,7 +365,10 @@
                       load: function () {
 
                           var series = this.series[0];
-                          var last = 0;
+                          var xhr = new XMLHttpRequest();
+                          xhr.open("GET", '/io.json', false);
+                          xhr.send(null);
+                          var last = JSON.parse(xhr.responseText).input;
 
                           setInterval(function () {
                             var xhr = new XMLHttpRequest();
