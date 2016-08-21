@@ -14,7 +14,7 @@ BASE_DIR = os.path.abspath('.')
 
 settings.configure(
     DEBUG=True,
-    BASE_DIR = BASE_DIR,
+    BASE_DIR=BASE_DIR,
     # TEMPLATE_DIRS = os.path.join('.', 'templates'),
     SECRET_KEY='thisisthesecretkey',
     ROOT_URLCONF=__name__,
@@ -23,15 +23,14 @@ settings.configure(
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ),
-    INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    INSTALLED_APPS=(
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
     ),
-    TEMPLATES = [{
+    TEMPLATES=[{
         'BACKEND': 'django.template.backends.jinja2.Jinja2',
         'DIRS': [
             'templates',
@@ -39,7 +38,7 @@ settings.configure(
         'APP_DIRS': False,
         'OPTIONS': {
         },
-    },],
+    }, ],
     STATICFILES_DIRS=(
         os.path.join(BASE_DIR, 'static'),
     ),
@@ -55,23 +54,26 @@ def fails(request):
         lindex = rindex - 10
     else:
         lindex = 0
-    results = rconn.lrange('fail', lindex, rindex )
+    results = rconn.lrange('fail', lindex, rindex)
     results = (x.decode('utf-8') for x in results)
     return results
 
+
 def get_io(request):
     return JsonResponse({'input': getint('input') or 0,
-                    'output': getint('output') or 0})
+                         'output': getint('output') or 0})
+
 
 def worker(request, worker_id):
-    available = bool(getint('worker:'+worker_id+'.available'))
+    available = bool(getint('worker:' + worker_id + '.available'))
     if not available:
-        current = getstr('worker:'+worker_id+'.current')
+        current = getstr('worker:' + worker_id + '.current')
     else:
         current = None
-    count_success = getint('worker:'+worker_id+'.count_success') or 0
-    count_failed = getint('worker:'+worker_id+'.count_failed') or 0
-    throughput = (count_failed or 0) + (count_success or 0) # total no of tasks finished
+    count_success = getint('worker:' + worker_id + '.count_success') or 0
+    count_failed = getint('worker:' + worker_id + '.count_failed') or 0
+    # total no of tasks finished
+    throughput = (count_failed or 0) + (count_success or 0)
     data = {
         'available': available,
         'current': current,
@@ -89,13 +91,13 @@ def workers(request):
 
     for worker in workers_list:
         worker_id = worker.split()[0]
-        available = bool(getint('worker:'+worker_id+'.available'))
+        available = bool(getint('worker:' + worker_id + '.available'))
         if not available:
-            current = getstr('worker:'+worker_id+'.current')
+            current = getstr('worker:' + worker_id + '.current')
         else:
             current = None
-        count_success = getint('worker:'+worker_id+'.count_success') or 0
-        count_failed = getint('worker:'+worker_id+'.count_failed') or 0
+        count_success = getint('worker:' + worker_id + '.count_success') or 0
+        count_failed = getint('worker:' + worker_id + '.count_failed') or 0
         data = {
             'id': worker_id,
             'ip': worker.split()[1],
@@ -111,21 +113,23 @@ def workers(request):
 
 
 def home_dashboard(request):
-    context = {'page_title':'Task Queue Dashboard'}
+    context = {'page_title': 'Task Queue Dashboard'}
     return render(request, 'main_dashboard.html', context)
 
+
 def worker_dashboard(request, worker_id):
-    return render(request, 'worker_dashboard.html', {'page_title':'worker_dashboard', 'json_slug': worker_id})
+    return render(request, 'worker_dashboard.html', {'page_title': 'worker_dashboard', 'json_slug': worker_id})
+
 
 def task_dashboard(request, task_id):
     task = fetch_task(task_id)
     data = {
         'id': task_id,
-        'status' : getstr(task_id+'.status'),
-        'creation_time' : task.creation_time,
-        'running_time' : task.running_time,
-        'result' : task.result,
-        'code' : task.data,
+        'status': getstr(task_id + '.status'),
+        'creation_time': task.creation_time,
+        'running_time': task.running_time,
+        'result': task.result,
+        'code': task.data,
     }
     return render(request, 'task.html', data)
 

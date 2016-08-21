@@ -1,16 +1,19 @@
 import sys
+import types
 import queue
-from hashlib import md5
 import threading
-import dill, types
 from time import time
+from hashlib import md5
+import dill
 import redis
 import requests
+from task import Task
 
 import thriftpy
+from thriftpy.rpc import make_server, make_client
+
 dequeue_thrift = thriftpy.load('dequeue.thrift', module_name='dequeue_thrift')
 enqueue_thrift = thriftpy.load('enqueue.thrift', module_name='enqueue_thrift')
-from thriftpy.rpc import make_server, make_client
 
 
 def get_ip(interface='eth0'):
@@ -22,11 +25,7 @@ redis_ip = "127.0.0.1"
 redis_port = 6379
 master_ip = "127.0.0.1"
 master_port = 9091
-
-from task import Task
 rconn = redis.Redis(redis_ip, redis_port)
-
-
 tq = queue.Queue()  # queue of task objs
 tasks = {}
 workers = []
@@ -47,15 +46,15 @@ def top_n(tqueue, n):
 def top_pending(n):
     return top_n(tq, 5)
 
+
 def last_running():
     result = []
     for worker in workers:
-        result.append(getstr('worker:'+worker.id+'.current'))
+        result.append(getstr('worker:' + worker.id + '.current'))
     none_count = result.count(None)
     for _ in none_count:
         result.remove(None)
     return result
-
 
 
 def getint(id):
@@ -63,6 +62,7 @@ def getint(id):
         return int(rconn.get(id).decode('utf-8'))
     except AttributeError:
         return None
+
 
 def getstr(id):
     try:
@@ -74,6 +74,7 @@ def getstr(id):
 def send_to_worker(task, ip, port):
     client = make_client(dequeue_thrift.RPC, ip, port)
     client.task_service(task)
+
 
 def send_to_taskqueue(task, task_id, ip, port):
     client = make_client(enqueue_thrift.RPC, ip, port)
@@ -113,20 +114,20 @@ class Worker:
 
     def __init__(self, ip, port):
         self.r = rconn
-        self.id = md5((ip+str(port)).encode()).hexdigest()[:8]
+        self.id = md5((ip + str(port)).encode()).hexdigest()[:8]
         self.ip = ip
         self.port = port
         self.set_available()
 
     def set_available(self):
-        self.r.set('worker:'+self.id+'.available', '1')
+        self.r.set('worker:' + self.id + '.available', '1')
 
     def set_not_available(self, task_id):
-        self.r.set('worker:'+self.id+'.available', '0')
-        self.r.set('worker:'+self.id+'.current', task_id)
+        self.r.set('worker:' + self.id + '.available', '0')
+        self.r.set('worker:' + self.id + '.current', task_id)
 
     def is_available(self):
-        state = self.r.get('worker:'+self.id+'.available').decode('utf-8')
+        state = self.r.get('worker:' + self.id + '.available').decode('utf-8')
         if state == '0':
             return False
         else:
@@ -140,17 +141,17 @@ class Worker:
 
     def work(self, task):
         self.r.set(task.id, 'running')
-        self.r.set('worker:'+ self.id +'.current', task.id)
+        self.r.set('worker:' + self.id + '.current', task.id)
         task.running_time = time()
         try:
             run = types.FunctionType(task.data, globals(), 'run')
             task.result = run()
             self.r.set(task.id, 'finished')
-            self.r.incr('worker:'+self.id+".count_success")
+            self.r.incr('worker:' + self.id + ".count_success")
         except Exception as error_msg:
             print(error_msg, file=sys.stderr)
             self.r.set(task.id, 'failed')
-            self.r.incr('worker:'+self.id+".count_failed")
+            self.r.incr('worker:' + self.id + ".count_failed")
             self.r.lpush('fail', task.id)
         task.running_time = time() - task.running_time
         self.set_available()
@@ -184,13 +185,15 @@ class QueueHandler:
 
     def task_service(self, task, task_id):
         rconn.incr("input")
-        tq.put({'data':task, 'id': task_id})
+        tq.put({'data': task, 'id': task_id})
         tasks[task_id] = task
 
 
 def listen():
-    server = make_server(enqueue_thrift.RPC, QueueHandler(), master_ip, master_port)
+    server = make_server(enqueue_thrift.RPC,
+                         QueueHandler(), master_ip, master_port)
     server.serve()
+
 
 def main():
     add_worker('127.0.0.1', 9089)
