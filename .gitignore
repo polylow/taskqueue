@@ -2,3 +2,6 @@
 __pycache__/
 dump.rdb
 nohup.out
+
+node_modules/
+.yarn.lock
