@@ -5,6 +5,7 @@ import threading
 from time import time
 from hashlib import md5
 import dill
+import hues
 import redis
 import requests
 from task import Task
@@ -74,6 +75,7 @@ def getstr(id):
 def send_to_worker(task, ip, port):
     client = make_client(dequeue_thrift.RPC, ip, port)
     client.task_service(task)
+    hues.info("task dispatched: ", task.id)
 
 
 def send_to_taskqueue(task, task_id, ip, port):
@@ -141,6 +143,7 @@ class Worker:
 
     def work(self, task):
         self.r.set(task.id, 'running')
+        hues.info('running:', task.id)
         self.r.set('worker:' + self.id + '.current', task.id)
         task.running_time = time()
         try:
