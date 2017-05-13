@@ -23,7 +23,7 @@ redis_port = 6379
 master_ip = "127.0.0.1"
 master_port = 9091
 
-from task import Task
+from task import Task,Redistask
 rconn = redis.Redis(redis_ip, redis_port)
 
 
@@ -82,8 +82,8 @@ def send_to_taskqueue(task, task_id, ip, port):
 
 def fetch_task(task_id):
     try:
-        task = tasks[task_id]
-        return task
+        task_info = rconn.get(task_id)
+        return task_info
     except KeyError:
         print("task not found")
         return Task(None)
@@ -104,8 +104,12 @@ class Producer:
     def enqueue(self, work):
         source = work.__code__
         task = Task(source)
+        print("adding task: ",task.creation_time)
+        tk = Redistask(task.creation_time)
         data = dill.dumps(task)
-        self.r.set(task.id, 'pending')
+        tkdump = dill.dumps(tk);
+        self.r.set(task.id, tkdump);
+        self.r.lpush('tasks', task.id)
         send_to_taskqueue(data, task.id, master_ip, master_port)
 
 
@@ -139,20 +143,28 @@ class Worker:
         self.work(task)
 
     def work(self, task):
-        self.r.set(task.id, 'running')
+        tk = self.r.get(task.id)
+        td = dill.loads(tk)
+        td.result = 'running'
+        self.r.set(task.id, dill.dumps(td))
         self.r.set('worker:'+ self.id +'.current', task.id)
         task.running_time = time()
         try:
             run = types.FunctionType(task.data, globals(), 'run')
             task.result = run()
-            self.r.set(task.id, 'finished')
+            td.result = 'finished'
+            self.r.set(task.id, dill.dumps(td))
             self.r.incr('worker:'+self.id+".count_success")
         except Exception as error_msg:
             print(error_msg, file=sys.stderr)
-            self.r.set(task.id, 'failed')
+            td.result = 'failed'
+            self.r.set(task.id, dill.dumps(td))
             self.r.incr('worker:'+self.id+".count_failed")
             self.r.lpush('fail', task.id)
         task.running_time = time() - task.running_time
+        print("Task running time: ",task.running_time)
+        td.running_time = task.running_time
+        self.r.set(task.id, dill.dumps(td))
         self.set_available()
         return task.result
 
@@ -186,6 +198,7 @@ class QueueHandler:
         rconn.incr("input")
         tq.put({'data':task, 'id': task_id})
         tasks[task_id] = task
+        print("task added:",task_id)
 
 
 def listen():

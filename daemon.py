@@ -1,5 +1,7 @@
 import os
 import sys
+import datetime
+import dill, types
 from django.conf import settings
 from django.conf.urls import url
 from django.shortcuts import render
@@ -119,16 +121,26 @@ def worker_dashboard(request, worker_id):
 
 def task_dashboard(request, task_id):
     task = fetch_task(task_id)
+    task = dill.loads(task)
     data = {
         'id': task_id,
-        'status' : getstr(task_id+'.status'),
-        'creation_time' : task.creation_time,
+        'creation_time' : datetime.datetime.fromtimestamp(task.creation_time),
         'running_time' : task.running_time,
-        'result' : task.result,
-        'code' : task.data,
+        'result' : task.result
     }
     return render(request, 'task.html', data)
 
+def tasklist(request):
+    tasks = rconn.lrange("tasks", 0, -1)
+    tasklist = []
+    for t in tasks:
+        td = fetch_task(t.decode('utf-8'))
+        td = dill.loads(td)
+        td.creation_time = datetime.datetime.fromtimestamp(td.creation_time)
+        td.id = t.decode('utf-8');
+        tasklist.append(td)
+    totaltasks = len(tasklist)
+    return render(request, 'tasklist.html', {'page_title':'tasklist', 'tasks': tasklist, 'total': totaltasks})
 
 # urls.py
 
@@ -138,6 +150,7 @@ urlpatterns = (
     url(r'^worker/(?P<worker_id>[0-9a-z]{8})$', worker_dashboard),
     url(r'^worker/(?P<worker_id>[0-9a-z]{8}).json$', worker),
     url(r'^task/(?P<task_id>[0-9a-z]{32})$', task_dashboard),
+    url(r'^alltasks/$', tasklist),
     url(r'^io.json', get_io),
 )
 

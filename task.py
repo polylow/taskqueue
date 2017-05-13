@@ -8,3 +8,9 @@ class Task:
 		self.result = None
 		self.creation_time = time.time()
 		self.running_time = None
+
+class Redistask:
+	def __init__(self, creation_time):
+		self.result = None
+		self.creation_time = time.time()
+		self.running_time = None
