@@ -1,0 +1,5 @@
+thriftpy
+requests
+django==1.11
+dill
+netifaces

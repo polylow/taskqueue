@@ -3,20 +3,19 @@ import sys
 from django.conf import settings
 from django.conf.urls import url
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.template import RequestContext, loader
+from django.http import JsonResponse
 from taskqueue import rconn, getint, getstr, fetch_task
-from random import randrange
 
 
 # settings.py
 BASE_DIR = os.path.abspath('.')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 settings.configure(
     DEBUG=True,
     BASE_DIR=BASE_DIR,
     # TEMPLATE_DIRS = os.path.join('.', 'templates'),
-    SECRET_KEY='thisisthesecretkey',
+    SECRET_KEY=SECRET_KEY,
     ROOT_URLCONF=__name__,
     MIDDLEWARE_CLASSES=(
         'django.middleware.common.CommonMiddleware',

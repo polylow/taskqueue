@@ -2,15 +2,17 @@ import sys
 import types
 import queue
 import threading
+import logging
 from time import time
 from hashlib import md5
 import dill
 import redis
-import requests
 from task import Task
 
 import thriftpy
 from thriftpy.rpc import make_server, make_client
+
+logger = logging.getLogger(__name__)
 
 dequeue_thrift = thriftpy.load('dequeue.thrift', module_name='dequeue_thrift')
 enqueue_thrift = thriftpy.load('enqueue.thrift', module_name='enqueue_thrift')
@@ -52,9 +54,7 @@ def last_running():
     for worker in workers:
         result.append(getstr('worker:' + worker.id + '.current'))
     none_count = result.count(None)
-    for _ in none_count:
-        result.remove(None)
-    return result
+    return filter(lambda x: x is not None, result)
 
 
 def getint(id):
@@ -86,7 +86,7 @@ def fetch_task(task_id):
         task = tasks[task_id]
         return task
     except KeyError:
-        print("task not found")
+        logger.error("task not found")
         return Task(None)
 
 
@@ -149,7 +149,7 @@ class Worker:
             self.r.set(task.id, 'finished')
             self.r.incr('worker:' + self.id + ".count_success")
         except Exception as error_msg:
-            print(error_msg, file=sys.stderr)
+            logger.error(error_msg)
             self.r.set(task.id, 'failed')
             self.r.incr('worker:' + self.id + ".count_failed")
             self.r.lpush('fail', task.id)
