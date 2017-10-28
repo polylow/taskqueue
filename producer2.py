@@ -1,6 +1,4 @@
-import requests
 import time
-import uuid
 from taskqueue import Producer
 
 
@@ -11,6 +9,6 @@ def run():
     raise Exception
 
 
-for i in range(188):
+for _ in range(188):
     producer.enqueue(run)
     time.sleep(2)
